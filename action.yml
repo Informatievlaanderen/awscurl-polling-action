@@ -1,0 +1,55 @@
+name: awscurl-polling-action
+description: CI Tool awscurl-polling-docker action
+author: Digitaal Vlaanderen
+inputs:
+
+  environment:
+    description: 'options ["test", "beta", "tni", "stg", "prd"]'
+    required: true
+    default: stg
+
+  version:
+    description: 'build version'
+    required: true
+
+  status-url:
+    description: status url
+    required: true
+
+  deploy-url: 
+    description: deploy url
+    required: true
+
+  access-key:
+    description: aws access key
+    required: true
+
+  secret-key:
+    description: aws secret key
+    required: true
+
+  region:
+    description: 'region | default: eu-west-1'
+    required: false
+    default: eu-west-1
+
+  interval:
+    description: polling interval in seconds default is 2 seconds
+    required: false
+    default: 2
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+    - ${{ inputs.environment }}
+    - ${{ inputs.version }}
+    - ${{ inputs.status-url }}
+    - ${{ inputs.deploy-url }}
+    - ${{ inputs.access-key }}
+    - ${{ inputs.secret-key }}
+    - ${{ inputs.region }}
+    - ${{ inputs.interval }}
+branding:
+  icon: 'terminal'
+  color: 'yellow'
