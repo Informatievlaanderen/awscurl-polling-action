@@ -37,7 +37,7 @@ def getStatus(build_id):
 def main():
     buildResponse = sendBuildRequest()
     time.sleep(10)
-    while true:
+    while True:
         statusResponse = getStatus(buildResponse.body.BuildUuid)
         status = statusResponse.status
         print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
