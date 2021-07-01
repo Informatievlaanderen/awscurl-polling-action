@@ -5,7 +5,8 @@ jobs:
   one:
       runs-on: ubuntu-latest
       steps:
-        - name: sample
+        - name: awscurl-polling-action
+          id: awscurl-polling-action
           uses: informatievlaanderen/awscurl-polling-action@main
           with:
             environment: stg
@@ -16,3 +17,9 @@ jobs:
             secret-key: ${{ secrets.SECRET_KEY }}
             region: eu-west-1
             interval: 2
+        - name: output
+          shell: bash
+          run: |
+            echo build-uuid: ${{ steps.awscurl-polling-action.outputs.build-uuid }}
+            echo Status: ${{ steps.awscurl-polling-action.outputs.status }}
+            echo ${{ steps.awscurl-polling-action.outputs.final-message }}

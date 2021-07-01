@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import sys, subprocess, json, time, argparse
+import os, sys, subprocess, json, time, argparse
 
 # args
 parser = argparse.ArgumentParser(description='awscurl polling action')
@@ -14,6 +14,24 @@ parser.add_argument('-r','--region', help='region default: eu-west-1', default='
 parser.add_argument('-i','--interval', type=int, help='polling interval in seconds. default: 2', default=2)
 args = parser.parse_args()
 
+status_responses = []
+
+def sendWarning(message):
+    os.system(f'echo "::warning ::{message}"')
+
+def sendFailed(message):
+    os.system(f'echo "::error ::{message}"')
+    sys.exit(1)
+
+def sendGroupedOutput(group_name, body):
+    os.system(f'echo "::group::{group_name}"')
+    for line in body:
+        os.system(f'echo "{line}"')
+    os.system(f'echo "::endgroup::"')
+
+def sendOutput(name,value):
+    os.system(f'echo "::set-output name={name}::{value}"')
+
 def exec(cmd):
     return (subprocess.Popen(cmd,
                              shell=True,
@@ -24,34 +42,39 @@ def sendBuildRequest():
     aws_deploy_req_body = '{\"environment\":\"' + args.environment + '\",\"version\":\"' + args.version + '\"}'
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
     output = exec(cmd)
-    print(f'deploy response: {output}')
+    sendGroupedOutput("deploy response",[output]) #Logging
     return json.loads(output)
 
 def getStatus(build_id):
     aws_status_url = f'{args.status_url}/{build_id}'
-    print(aws_status_url)
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api {aws_status_url}"
     output = exec(cmd)
-    print(f'status response: {output}')
+    status_responses.append(output)
     return json.loads(output)
 
 def main():
     buildResponse = sendBuildRequest()
+    sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
     time.sleep(10)
     while True:
         statusResponse = getStatus(buildResponse['body']['BuildUuid'])
         status = statusResponse['status']
         print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
-
+        
         if status == 'SUCCEEDED':
-            break
+           break
 
         if status == 'INPROGRESS' or status == 'STOPPING':
-            time.sleep(args.interval)
-            continue
-
-        print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
-        sys.exit(1)
+           time.sleep(args.interval)
+           continue
+        
+        sendGroupedOutput("status responses",status_responses)
+        sendWarning(f"build-uuid: {statusResponse }")
+        sendFailed(f'Deployment for version {args.version} to environment {args.environment}: {status}')
+    
+    sendGroupedOutput("status responses",status_responses)
+    sendOutput("status", status)
+    sendOutput("final-message",f'Deployment for version {args.version} to environment {args.environment}: {status}')
     sys.exit()
 
 if __name__ == "__main__":

@@ -38,6 +38,16 @@ inputs:
     required: false
     default: 2
 
+outputs:
+  build-uuid:
+    description: the build-uuid
+
+  status:
+    description: the final status
+
+  final-message:
+    description: the final message
+
 runs:
   using: 'docker'
   image: 'Dockerfile'
