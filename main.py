@@ -39,7 +39,7 @@ def main():
     time.sleep(10)
     while True:
         statusResponse = getStatus(buildResponse.['body']['BuildUuid'])
-        status = statusResponse.status
+        status = statusResponse['status']
         print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
 
         if status == 'SUCCEEDED':
