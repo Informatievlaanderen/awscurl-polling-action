@@ -1,14 +1,13 @@
-FROM ubuntu:20.04
+FROM python:3.8.12-slim
 
-RUN apt-get update && \
-    apt-get install --no-install-recommends -y python3.8 python3-pip python3.8-dev curl && \
-    pip --no-cache-dir install --upgrade pip && \
-    pip --no-cache-dir install setuptools wheel && \
-    pip --no-cache-dir install awscurl
+COPY install-packages.sh .
+RUN chmod +x install-packages.sh
+RUN ./install-packages.sh
 
 COPY entrypoint.sh /entrypoint.sh
 COPY main.py /main.py
 
+RUN chmod +x entrypoint.sh
 RUN chmod +x /main.py
 
 ENTRYPOINT ["/entrypoint.sh"]
