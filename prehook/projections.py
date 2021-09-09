@@ -1,11 +1,13 @@
 #!/usr/bin/python3
 
+from os import system
 import sys, time, argparse, boto3
 
 # args
 parser = argparse.ArgumentParser(description='projections prehook')
 parser.add_argument('-c','--cluster', help='cluster name', required=True)
 parser.add_argument('-s','--service', help='service name', required=True)
+parser.add_argument('-a','--appname', help='projections name e.g.streetname-registry-projections', required=True)
 parser.add_argument('-p','--profile', help='profile name', default='')
 parser.add_argument('-i','--interval', type=int, help='polling interval for fetching desiredCount in seconds. default: 2', default=2)
 args = parser.parse_args()
@@ -13,7 +15,7 @@ args = parser.parse_args()
 def getDistributionLockName(ecs):
     # Get task definition name
     taskDefinitions = ecs.list_task_definitions(
-        familyPrefix='basisregisters-staging-streetname-registry-projections',
+        familyPrefix= args.cluster + '-' + args.appname,
         status='ACTIVE',
         sort='DESC',
     )
@@ -30,6 +32,8 @@ def getDistributionLockName(ecs):
         an_iterator = filter(lambda env : env["name"] == "DistributedLock__TableName", containers["environment"])
         for i in list(an_iterator):
             distributedLocks.add(i["value"])
+    
+    print(distributedLocks)
     
     return list(distributedLocks)    
 
@@ -61,22 +65,23 @@ def deleteLockDynomoDb(ecs, dynamodb):
         print(f'deleted table: {lock}')
 
 def main():
+    # setup boto client
     if args.profile != '':
         session = boto3.Session(profile_name=args.profile)
         ecs = session.client("ecs")
         dynamodb = session.client("dynamodb")
-    ecs = boto3.client("ecs")
-    dynamodb = boto3.client("dynamodb")
-    print("initialized boto3")
+    else:
+        ecs = boto3.client("ecs")
+        dynamodb = boto3.client("dynamodb")
 
     # downscale to 0
     if not isDownScaled(ecs):
         print("set desired count to 0")
         setServiceDesiredCount(ecs, 0)
-        
+
     # wait till complete
     while not isDownScaled(ecs):
-        print("sleep")
+        print("wait")
         time.sleep(args.interval)
     print("service is downscaled")
     
