@@ -19,11 +19,13 @@ def setServiceDesiredCount(ecs,count):
 
 
 def main():
+    # setup boto client
     if args.profile != '':
         session = boto3.Session(profile_name=args.profile)
         ecs = session.client("ecs")
-    ecs = boto3.client("ecs")
-    print("initialized boto3")
+    else:
+        ecs = boto3.client("ecs")
+
     print("set desired count to 1")
 
     setServiceDesiredCount(ecs, 1)

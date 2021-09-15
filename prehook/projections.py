@@ -15,7 +15,7 @@ args = parser.parse_args()
 def getDistributionLockName(ecs):
     # Get task definition name
     taskDefinitions = ecs.list_task_definitions(
-        familyPrefix= args.cluster + '-' + args.appname,
+        familyPrefix= args.appname,
         status='ACTIVE',
         sort='DESC',
     )
