@@ -55,13 +55,41 @@ def isDownScaled(ecs):
     pendingCount = response["services"][0]["pendingCount"]
     return runningCount == 0 and pendingCount == 0
 
+def truncateTable(dynamodb, tableName):
+    table = dynamodb.Table(tableName)
+    
+    #get the table keys
+    tableKeyNames = [key.get("AttributeName") for key in table.key_schema]
+
+    #Only retrieve the keys for each item in the table (minimize data transfer)
+    projectionExpression = ", ".join('#' + key for key in tableKeyNames)
+    expressionAttrNames = {'#'+key: key for key in tableKeyNames}
+    
+    counter = 0
+    page = table.scan(ProjectionExpression=projectionExpression, ExpressionAttributeNames=expressionAttrNames)
+    with table.batch_writer() as batch:
+        while page["Count"] > 0:
+            counter += page["Count"]
+            # Delete items in batches
+            for itemKeys in page["Items"]:
+                batch.delete_item(Key=itemKeys)
+            # Fetch the next page
+            if 'LastEvaluatedKey' in page:
+                page = table.scan(
+                    ProjectionExpression=projectionExpression, ExpressionAttributeNames=expressionAttrNames,
+                    ExclusiveStartKey=page['LastEvaluatedKey'])
+            else:
+                break
+    print(f"Deleted {counter}")
+
 def deleteLockDynomoDb(ecs, dynamodb):
     locks = getDistributionLockName(ecs)
     for lock in locks:
-        print(f'deleting table: {lock}')
-        response = dynamodb.delete_table(
-            TableName = lock
-        )
+        print(f'truncate table: {lock}')
+        truncateTable(lock)
+        # response = dynamodb.delete_table(
+        #     TableName = lock
+        # )
         print(f'deleted table: {lock}')
 
 def main():
