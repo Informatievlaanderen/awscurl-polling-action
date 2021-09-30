@@ -86,7 +86,7 @@ def deleteLockDynomoDb(ecs, dynamodb):
     locks = getDistributionLockName(ecs)
     for lock in locks:
         print(f'truncate table: {lock}')
-        truncateTable(lock)
+        truncateTable(dynamodb, lock)
         # response = dynamodb.delete_table(
         #     TableName = lock
         # )
