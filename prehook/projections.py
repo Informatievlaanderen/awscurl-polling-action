@@ -55,8 +55,8 @@ def isDownScaled(ecs):
     pendingCount = response["services"][0]["pendingCount"]
     return runningCount == 0 and pendingCount == 0
 
-def truncateTable(dynamodb, tableName):
-    table = dynamodb.Table(tableName)
+def truncateTable(tableName):
+    table = boto3.resource('dynamodb').Table(tableName)
     
     #get the table keys
     tableKeyNames = [key.get("AttributeName") for key in table.key_schema]
@@ -86,7 +86,7 @@ def deleteLockDynomoDb(ecs, dynamodb):
     locks = getDistributionLockName(ecs)
     for lock in locks:
         print(f'truncate table: {lock}')
-        truncateTable(dynamodb, lock)
+        truncateTable(lock)
         # response = dynamodb.delete_table(
         #     TableName = lock
         # )
