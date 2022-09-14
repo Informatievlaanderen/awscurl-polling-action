@@ -1,7 +1,7 @@
-FROM python:3.8.12-slim
+FROM python:3.10.2-slim
 
-COPY install-packages.sh .
-RUN chmod +x install-packages.sh
+COPY install-packages.sh ./install-packages.sh
+RUN chmod +x ./install-packages.sh
 RUN ./install-packages.sh
 
 COPY entrypoint.sh /entrypoint.sh
