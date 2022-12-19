@@ -57,9 +57,13 @@ def main():
     sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
     time.sleep(10)
     while True:
-        statusResponse = getStatus(buildResponse['body']['BuildUuid'])
-        status = statusResponse['status']
-        print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
+        try:
+            statusResponse = getStatus(buildResponse['body']['BuildUuid'])
+            status = statusResponse['status']
+            print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
+        except:
+            print(f'Polling request failed. Trying again!')
+            continue
         
         if status == 'SUCCEEDED':
            break
