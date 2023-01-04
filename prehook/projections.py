@@ -113,10 +113,13 @@ def main():
         time.sleep(args.interval)
     print("service is downscaled")
     
-    # delete lock
-    deleteLockDynomoDb(ecs, dynamodb)
-    print("prehook executed succesfully")
-
+    try:
+        # delete lock
+        deleteLockDynomoDb(ecs, dynamodb)
+        print("prehook executed succesfully")
+    except:
+        print("prehook executed failed")
+        
     sys.exit()
 
 if __name__ == "__main__":
