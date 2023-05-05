@@ -4,7 +4,7 @@ author: Digitaal Vlaanderen
 inputs:
 
   environment:
-    description: 'options ["test", "beta", "tni", "stg", "prd"]'
+    description: 'options ["test", "beta", "tni", "stg", "prd", "acc"]'
     required: true
     default: stg
 
