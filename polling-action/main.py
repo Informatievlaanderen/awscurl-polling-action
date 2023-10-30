@@ -39,7 +39,7 @@ def exec(cmd):
                              universal_newlines=True).communicate()[0]).strip()
 
 def sendBuildRequest():
-    aws_deploy_req_body = '{\"environment\":\"' + args.environment + '\",\"version\":\"' + args.version + '\"}'
+    aws_deploy_req_body = '{\"environment\":\"' + args.environment + '\", \"deploy_target\": \"ecs_service\", \"version\":\"' + args.version + '\"}'
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
     output = exec(cmd)
     sendGroupedOutput("deploy response",[output]) #Logging
