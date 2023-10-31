@@ -39,8 +39,10 @@ def exec(cmd):
                              universal_newlines=True).communicate()[0]).strip()
 
 def sendBuildRequest():
-    aws_deploy_req_body = '{\"deploy_target\":\"ecs_service\", \"environment\":\"' + args.environment + '\",\"version\":\"' + args.version + '\"}'
+    aws_deploy_req_body = '{\"deploy_target\":\"ecs_service\",\"environment\":\"' + args.environment + '\",\"version\":\"' + args.version + '\"}'
+
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
+
     output = exec(cmd)
     sendGroupedOutput("deploy response",[output]) #Logging
     return json.loads(output)
@@ -53,8 +55,9 @@ def getStatus(build_id):
     return json.loads(output)
 
 def main():
+    print(f'Start')
+
     buildResponse = sendBuildRequest()
-    print(f'Build UUID: {buildResponse["body"]["BuildUuid"]}')
 
     sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
     time.sleep(10)
