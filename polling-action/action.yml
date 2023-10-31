@@ -50,7 +50,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:1.0.2'
+  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:1.0.3'
   args:
     - ${{ inputs.environment }}
     - ${{ inputs.version }}

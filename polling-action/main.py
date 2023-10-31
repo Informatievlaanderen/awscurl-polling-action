@@ -54,6 +54,8 @@ def getStatus(build_id):
 
 def main():
     buildResponse = sendBuildRequest()
+    print(f'Build UUID: {buildResponse["body"]["BuildUuid"]}')
+
     sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
     time.sleep(10)
     while True:
