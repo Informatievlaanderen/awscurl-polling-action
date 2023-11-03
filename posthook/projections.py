@@ -12,9 +12,10 @@ args = parser.parse_args()
 
 def setServiceDesiredCount(ecs,count):
     response = ecs.update_service(
-        cluster= args.cluster,
-        service= args.service,
-        desiredCount = count
+        cluster = args.cluster,
+        service = args.service,
+        desiredCount = count,
+        forceNewDeployment = True
     )
 
 
