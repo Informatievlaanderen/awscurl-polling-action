@@ -22,6 +22,7 @@ jobs:
             secret-key: ${{ secrets.SECRET_KEY }}
             region: eu-west-1
             interval: 2
+            deploy-target: 'none'
         - name: output
           shell: bash
           run: |
@@ -42,6 +43,7 @@ jobs:
 | secret-key | AWS Secret Key | - | Yes |
 | region | AWS Region | `eu-west-1` | No |
 | interval | Polling interval in seconds | 2 | No |
+| deploy-target | `none`, `beanstalk`, `ecs`, `ecs_service`, `agb_ecs_service`, `ecs_scheduled_task` | `none` | No |
 
 ### Outputs
 |Argument| Description |
