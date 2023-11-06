@@ -4,7 +4,7 @@ import os, sys, subprocess, json, time, argparse
 
 # args
 parser = argparse.ArgumentParser(description='awscurl polling action')
-parser.add_argument('-e','--environment', help='options ["test", "beta", "tni", "stg", "prd"]', required=True)
+parser.add_argument('-e','--environment', help='options ["test", "beta", "tni", "stg", "acc", "prd"]', required=True)
 parser.add_argument('-v','--version', help='deploy version', required=True)
 parser.add_argument('-s','--status_url', required=True)
 parser.add_argument('-d', '--deploy_url', required=True)
@@ -12,6 +12,7 @@ parser.add_argument('--access_key', help='aws access key', required=True)
 parser.add_argument('--secret_key', help='aws secret key', required=True)
 parser.add_argument('-r','--region', help='region default: eu-west-1', default='eu-west-1')
 parser.add_argument('-i','--interval', type=int, help='polling interval in seconds. default: 2', default=2)
+parser.add_argument('--deploy_target', help='options ["beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', required=False)
 args = parser.parse_args()
 
 status_responses = []
@@ -39,8 +40,16 @@ def exec(cmd):
                              universal_newlines=True).communicate()[0]).strip()
 
 def sendBuildRequest():
-    aws_deploy_req_body = '{\"deploy_target\":\"ecs_service\",\"environment\":\"' + args.environment + '\",\"version\":\"' + args.version + '\"}'
+    payload = {
+        "environment": args.environment,
+        "version":args.version
+    }
+    
+    if args.deploy_target is not None:
+        payload.deploy_target: args.deploy_target
 
+    aws_deploy_req_body = json.dumps(payload)
+    
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
 
     output = exec(cmd)
