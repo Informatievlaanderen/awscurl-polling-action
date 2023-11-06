@@ -38,6 +38,11 @@ inputs:
     required: false
     default: 2
 
+  deploy-target:
+    description: 'options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"] | default: none '
+    required: false
+    default: none
+
 outputs:
   build-uuid:
     description: the build-uuid
@@ -50,7 +55,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:1.0.4'
+  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:1.0.5'
   args:
     - ${{ inputs.environment }}
     - ${{ inputs.version }}
@@ -60,6 +65,7 @@ runs:
     - ${{ inputs.secret-key }}
     - ${{ inputs.region }}
     - ${{ inputs.interval }}
+    - ${{ inputs.deploy-target }}
 branding:
   icon: 'terminal'
   color: 'yellow'
