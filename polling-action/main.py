@@ -12,7 +12,7 @@ parser.add_argument('--access_key', help='aws access key', required=True)
 parser.add_argument('--secret_key', help='aws secret key', required=True)
 parser.add_argument('-r','--region', help='region default: eu-west-1', default='eu-west-1')
 parser.add_argument('-i','--interval', type=int, help='polling interval in seconds. default: 2', default=2)
-parser.add_argument('--deploy_target', help='options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', default='none')
+parser.add_argument('-t','--deploy_target', help='options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', default='none', required=False)
 args = parser.parse_args()
 
 status_responses = []
@@ -45,8 +45,8 @@ def sendBuildRequest():
         "version":args.version
     }
     
-    if args.deploy_target is not None and args.deploy_target != "none":
-        payload.deploy_target: args.deploy_target
+    if args.deploy_target != "none":
+        payload["deploy_target"]= args.deploy_target
 
     aws_deploy_req_body = json.dumps(payload)
     
