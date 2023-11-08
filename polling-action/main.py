@@ -49,6 +49,7 @@ def sendBuildRequest():
         payload["deploy_target"]= args.deploy_target
 
     aws_deploy_req_body = json.dumps(payload)
+    sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
     
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
 
