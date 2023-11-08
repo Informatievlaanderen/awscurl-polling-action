@@ -7,7 +7,7 @@ else
   deploy_target="$9"
 fi
 
-python3 ./main.py \
+python3 /main.py \
 --environment "$1" \
 --version "$2" \
 --status_url "$3" \
