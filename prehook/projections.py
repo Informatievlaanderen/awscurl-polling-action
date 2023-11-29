@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 from os import system
-import sys, time, argparse, boto3
+import sys, time, argparse, boto3, botocore
 
 # args
 parser = argparse.ArgumentParser(description='projections prehook')
@@ -37,8 +37,6 @@ def getDistributionLockName(ecs):
     except botocore.exceptions.ClientError as error:
         print("Client Error")
         raise error
-    except:
-        print("Except")
     finally:
         print("Finally")
     
