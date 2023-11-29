@@ -28,6 +28,8 @@ def getDistributionLockName(ecs):
         taskDefinition= taskDefinitionName
     )
 
+    print(description)
+
     # Distributedlocks
     distributedLocks = set()
     for containers in description["taskDefinition"]["containerDefinitions"]:
