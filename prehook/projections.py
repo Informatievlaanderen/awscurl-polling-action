@@ -19,8 +19,10 @@ def getDistributionLockName(ecs):
         status='ACTIVE',
         sort='DESC',
     )
-    taskDefinitionName = taskDefinitions["taskDefinitionArns"][0]
 
+    print(taskDefinitions)
+    taskDefinitionName = taskDefinitions["taskDefinitionArns"][0]
+    
     # Get distribution lock names
     description = ecs.describe_task_definition(
         taskDefinition= taskDefinitionName
