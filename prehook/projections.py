@@ -34,9 +34,8 @@ def getDistributionLockName(ecs):
         description = ecs.describe_task_definition(
             taskDefinition= taskDefinitionName
         )
-    except botocore.exceptions.ClientError as error:
-        print("Client Error")
-        raise error
+    except botocore.exceptions.ClientError as e:
+        print(e.response)
     finally:
         print("Finally")
     
