@@ -20,26 +20,12 @@ def getDistributionLockName(ecs):
         sort='DESC',
     )
 
-    print(taskDefinitions)
     taskDefinitionName = taskDefinitions["taskDefinitionArns"][0]
-    print(taskDefinitionName)
     
     # Get distribution lock names
-    # description = ecs.describe_task_definition(
-    #     taskDefinition= taskDefinitionName
-    # )
-
-    try:
-        print("Start describe task definition")
-        description = ecs.describe_task_definition(
-            taskDefinition= taskDefinitionName
-        )
-    except botocore.exceptions.ClientError as e:
-        print(e.response)
-    finally:
-        print("Finally")
-    
-    print(description)
+    description = ecs.describe_task_definition(
+        taskDefinition= taskDefinitionName
+    )
 
     # Distributedlocks
     distributedLocks = set()
