@@ -31,7 +31,7 @@ def sendGroupedOutput(group_name, body):
     os.system(f'echo "::endgroup::"')
 
 def sendOutput(name,value):
-    os.system(f'echo "::set-output name={name}::{value}"')
+    os.system(f'echo "{name}={value}" >> $GITHUB_OUTPUT')
 
 def exec(cmd):
     return (subprocess.Popen(cmd,
@@ -41,17 +41,17 @@ def exec(cmd):
 
 def sendBuildRequest():
     payload = {
-        "environment": args.environment,
-        "version":args.version
+        "environment": str(args.environment),
+        "version":str(args.version)
     }
     
     if args.deploy_target != "none":
-        payload["deploy_target"]= args.deploy_target
+        payload["deploy_target"]= str(args.deploy_target)
 
     aws_deploy_req_body = json.dumps(payload)
-    sendGroupedOutput("request body",aws_deploy_req_body) #Logging
+    sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
     
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
+    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' '{args.deploy_url}'"
 
     output = exec(cmd)
     sendGroupedOutput("deploy response",[output]) #Logging
@@ -59,7 +59,7 @@ def sendBuildRequest():
 
 def getStatus(build_id):
     aws_status_url = f'{args.status_url}/{build_id}'
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api {aws_status_url}"
+    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api '{aws_status_url}'"
     output = exec(cmd)
     status_responses.append(output)
     return json.loads(output)
@@ -68,7 +68,11 @@ def main():
     print(f'Start')
 
     buildResponse = sendBuildRequest()
-
+    
+    if buildResponse.get('body') is None:
+        sendOutput("deploy response", "Something went wrong")
+        return
+    
     sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
     time.sleep(10)
     while True:
@@ -91,7 +95,7 @@ def main():
         sendWarning(f"build-uuid: {statusResponse }")
         sendFailed(f'Deployment for version {args.version} to environment {args.environment}: {status}')
     
-    sendGroupedOutput("status responses",status_responses)
+    sendGroupedOutput("status responses",  [status_responses])
     sendOutput("status", status)
     sendOutput("final-message",f'Deployment for version {args.version} to environment {args.environment}: {status}')
     sys.exit()
