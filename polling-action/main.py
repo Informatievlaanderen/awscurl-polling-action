@@ -51,7 +51,7 @@ def sendBuildRequest():
     aws_deploy_req_body = json.dumps(payload)
     sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
     
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' '{args.deploy_url}'"
+    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
 
     output = exec(cmd)
     sendGroupedOutput("deploy response",[output]) #Logging
@@ -59,7 +59,7 @@ def sendBuildRequest():
 
 def getStatus(build_id):
     aws_status_url = f'{args.status_url}/{build_id}'
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api '{aws_status_url}'"
+    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api {aws_status_url}"
     output = exec(cmd)
     status_responses.append(output)
     return json.loads(output)
