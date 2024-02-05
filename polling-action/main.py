@@ -13,6 +13,8 @@ parser.add_argument('--secret_key', help='aws secret key', required=True)
 parser.add_argument('-r','--region', help='region default: eu-west-1', default='eu-west-1')
 parser.add_argument('-i','--interval', type=int, help='polling interval in seconds. default: 2', default=2)
 parser.add_argument('-t','--deploy_target', help='options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', default='none', required=False)
+parser.add_argument('--domain', help='options ["none", "basisregisters"]', default='none', required=False)
+parser.add_argument('--project', help='options ["none", "basisregisters"]', default='none', required=False)
 args = parser.parse_args()
 
 status_responses = []
@@ -47,6 +49,12 @@ def sendBuildRequest():
     
     if args.deploy_target != "none":
         payload["deploy_target"]= str(args.deploy_target)
+
+    if args.project != "none":
+        payload["project"]= str(args.project)
+
+    if args.domain != "none":
+        payload["domain"]= str(args.domain)
 
     aws_deploy_req_body = json.dumps(payload)
     sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
