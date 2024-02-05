@@ -20,9 +20,10 @@ jobs:
             deploy-url: ${{ secrets.DEPLOY_URL }}
             access-key: ${{ secrets.ACCESS_KEY }}
             secret-key: ${{ secrets.SECRET_KEY }}
-            region: eu-west-1
             interval: 2
             deploy-target: 'none'
+            domain: 'none'
+            project: 'none'
         - name: output
           shell: bash
           run: |
@@ -41,9 +42,10 @@ jobs:
 | deploy-url | The deploy url for sending a request for deployment | - | Yes |
 | access-key | AWS Access Key | - | Yes |
 | secret-key | AWS Secret Key | - | Yes |
-| region | AWS Region | `eu-west-1` | No |
 | interval | Polling interval in seconds | 2 | No |
 | deploy-target | `none`, `beanstalk`, `ecs`, `ecs_service`, `agb_ecs_service`, `ecs_scheduled_task` | `none` | No |
+| domain | `none`, `basisregisters` | `none` | No |
+| project | `none`, `basisregisters` | `none` | No |
 
 ### Outputs
 |Argument| Description |

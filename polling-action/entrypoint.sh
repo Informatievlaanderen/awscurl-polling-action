@@ -1,10 +1,22 @@
 #!/bin/sh
 
 # Check if the deploy_taget ($9) is set or not
-if [ -z "$9" ]; then
+if [ -z "$8" ]; then
   deploy_target="none"
 else
-  deploy_target="$9"
+  deploy_target="$8"
+fi
+
+if [ -z "$9" ]; then
+  domain="none"
+else
+  domain="$9"
+fi
+
+if [ -z "$10" ]; then
+  project="none"
+else
+  project="$10"
 fi
 
 python3 /main.py \
@@ -14,6 +26,7 @@ python3 /main.py \
 --deploy_url "$4" \
 --access_key "$5" \
 --secret_key "$6" \
---region "$7" \
---interval "$8" \
---deploy_target "$deploy_target";
+--interval "$7" \
+--deploy_target "$deploy_target" \
+--domain "$domain" \
+--project "$project";
