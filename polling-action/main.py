@@ -20,20 +20,21 @@ args = parser.parse_args()
 status_responses = []
 
 def sendWarning(message):
-    os.system(f'echo "::warning ::{message}"')
+    print(f'::warning::{message}')
 
 def sendFailed(message):
-    os.system(f'echo "::error ::{message}"')
+    print(f'::error::{message}')
     sys.exit(1)
 
 def sendGroupedOutput(group_name, body):
-    os.system(f'echo "::group::{group_name}"')
+    print(f'::group::{group_name}')
     for line in body:
-        os.system(f'echo "{line}"')
-    os.system(f'echo "::endgroup::"')
+        print(f'{line}')
+    print(f'::endgroup::')
 
-def sendOutput(name,value):
-    os.system(f'echo "{name}={value}" >> $GITHUB_OUTPUT')
+def sendOutput(name, value):
+    with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
+        print(f'{name}={value}', file=fh)
 
 def exec(cmd):
     return (subprocess.Popen(cmd,
