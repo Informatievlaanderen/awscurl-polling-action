@@ -29,4 +29,5 @@ python3 /main.py \
 --interval "$7" \
 --deploy_target "$deploy_target" \
 --domain "$domain" \
---project "$project";
+--project "$project" \
+--application "$11";
