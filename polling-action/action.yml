@@ -54,6 +54,11 @@ inputs:
     required: false
     default: none
 
+  application:
+    description: 'options ["none", "basisregisters"] | default: none'
+    required: true
+    default: none
+
 outputs:
   build-uuid:
     description: the build-uuid
@@ -66,7 +71,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.2'
+  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.3'
   args:
     - ${{ inputs.environment }}
     - ${{ inputs.version }}
@@ -79,6 +84,7 @@ runs:
     - ${{ inputs.deploy-target }}
     - ${{ inputs.domain }}
     - ${{ inputs.project }}
+    - ${{ inputs.application }}
 branding:
   icon: 'terminal'
   color: 'yellow'

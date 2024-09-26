@@ -15,6 +15,7 @@ parser.add_argument('-i','--interval', type=int, help='polling interval in secon
 parser.add_argument('-t','--deploy_target', help='options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', default='none', required=False)
 parser.add_argument('--domain', help='options ["none", "basisregisters"]', default='none', required=False)
 parser.add_argument('--project', help='options ["none", "basisregisters"]', default='none', required=False)
+parser.add_argument('--application', help='options ["none", "basisregisters"]', default='none', required=True)
 args = parser.parse_args()
 
 status_responses = []
@@ -45,7 +46,7 @@ def exec(cmd):
 def sendBuildRequest():
     payload = {
         "deploy_target": str(args.deploy_target),
-        "version":{str(args.project): str(args.version)}
+        "version":{str(args.application): str(args.version)}
     }
 
     aws_deploy_req_body = json.dumps(payload)
