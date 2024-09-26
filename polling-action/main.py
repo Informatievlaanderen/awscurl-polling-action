@@ -44,22 +44,12 @@ def exec(cmd):
 
 def sendBuildRequest():
     payload = {
-        "environment": str(args.environment),
-        "version":str(args.version)
+        "deploy_target": str(args.deploy_target),
+        "version":{str(args.project): str(args.version)}
     }
-    
-    if args.deploy_target != "none":
-        payload["deploy_target"]= str(args.deploy_target)
-
-    if args.project != "none":
-        payload["project"]= str(args.project)
-
-    if args.domain != "none":
-        payload["domain"]= str(args.domain)
 
     aws_deploy_req_body = json.dumps(payload)
     sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
-    
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
 
     output = exec(cmd)
