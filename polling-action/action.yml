@@ -66,7 +66,7 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.1'
+  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.2'
   args:
     - ${{ inputs.environment }}
     - ${{ inputs.version }}
