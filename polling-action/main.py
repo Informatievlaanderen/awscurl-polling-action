@@ -68,16 +68,12 @@ def main():
     print(f'Start')
 
     buildResponse = sendBuildRequest()
-    
-    if buildResponse.get('body') is None:
-        sendFailed("Something went wrong, no body available")
-        return
-    
-    sendOutput("build-uuid", buildResponse['body']['BuildUuid'])
+
+    sendOutput("build-uuid", buildResponse['BuildUuid'])
     time.sleep(10)
     while True:
         try:
-            statusResponse = getStatus(buildResponse['body']['BuildUuid'])
+            statusResponse = getStatus(buildResponse['BuildUuid'])
             status = statusResponse['status']
             print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
         except:
