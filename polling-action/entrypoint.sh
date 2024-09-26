@@ -19,6 +19,12 @@ else
   project="${10}"
 fi
 
+if [ -z "${11}" ]; then
+  application="none"
+else
+  application="${11}"
+fi
+
 python3 /main.py \
 --environment "$1" \
 --version "$2" \
@@ -30,4 +36,4 @@ python3 /main.py \
 --deploy_target "$deploy_target" \
 --domain "$domain" \
 --project "$project" \
---application "$11";
+--application "$application";
