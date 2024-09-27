@@ -59,14 +59,10 @@ def sendBuildRequest():
     return json.loads(output)
 
 def getStatus(build_id):
-    aws_status_url = f'{args.deploy_url}/status/{build_id}'
-    print(f'Calling {aws_status_url}')
+    aws_status_url = f'{args.status_url}/{build_id}'
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST {aws_status_url}"
-    print(f'Calling cmd {cmd}')
     output = exec(cmd)
-    print(f'Output: {output}')
     status_responses.append(output)
-    print(f'Loading json')
     return json.loads(output)
 
 def main():
@@ -79,25 +75,27 @@ def main():
     while True:
         try:
             statusResponse = getStatus(buildResponse['BuildUuid'])
-            status = statusResponse['status']
+            statusMessage = statusResponse['Message']
+            print(f'Message: {statusMessage}"')
+            status = statusResponse['Details']['status']
             print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
         except:
             print(f'Polling request failed. Trying again!')
             continue
         
-        if status == 'SUCCEEDED':
+        if statusMessage == 'Succeeded':
            break
 
-        if status == 'INPROGRESS' or status == 'STOPPING':
+        if statusMessage == 'InProgress' or statusMessage == 'Stopping':
            time.sleep(args.interval)
            continue
         
         sendGroupedOutput("status responses",status_responses)
         sendWarning(f"build-uuid: {statusResponse }")
-        sendFailed(f'Deployment for version {args.version} to environment {args.environment}: {status}')
+        sendFailed(f'Deployment for version {args.version} to environment {args.environment}: {statusMessage}')
     
     sendGroupedOutput("status responses",  [status_responses])
-    sendOutput("status", status)
+    sendOutput("status", statusMessage)
     sendOutput("final-message",f'Deployment for version {args.version} to environment {args.environment}: {status}')
     sys.exit()
 
