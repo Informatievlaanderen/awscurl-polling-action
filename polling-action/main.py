@@ -75,7 +75,7 @@ def main():
     while True:
         try:
             statusResponse = getStatus(buildResponse['BuildUuid'])
-            statusMessage = statusResponse['Message']
+            statusMessage = statusResponse['message']
             print(f'Message: {statusMessage}"')
             status = statusResponse['Details']['status']
             print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
