@@ -59,7 +59,7 @@ def sendBuildRequest():
     return json.loads(output)
 
 def getStatus(build_id):
-    aws_status_url = f'{args.status_url}/{build_id}'
+    aws_status_url = f'{args.deploy_url}/status/{build_id}'
     print(f'Calling {aws_status_url}')
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST {aws_status_url}"
     print(f'Calling cmd {cmd}')
