@@ -77,7 +77,7 @@ def main():
             statusResponse = getStatus(buildResponse['BuildUuid'])
             statusMessage = statusResponse['message']
             print(f'Message: "{statusMessage}"')
-            status = statusResponse['Details']['status']
+            status = statusResponse['details']['status']
             print(f'Deployment for version {args.version} to environment {args.environment}: "{status}"')
         except Exception as e:
             print(f'Polling request failed with exception: {e}. Trying again!')
