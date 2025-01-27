@@ -76,11 +76,11 @@ def main():
         try:
             statusResponse = getStatus(buildResponse['BuildUuid'])
             statusMessage = statusResponse['message']
-            print(f'Message: {statusMessage}"')
+            print(f'Message: "{statusMessage}"')
             status = statusResponse['Details']['status']
-            print(f'Deployment for version {args.version} to environment {args.environment}: {status}"')
-        except:
-            print(f'Polling request failed. Trying again!')
+            print(f'Deployment for version {args.version} to environment {args.environment}: "{status}"')
+        except Exception as e:
+            print(f'Polling request failed with exception: {e}. Trying again!')
             continue
         
         if statusMessage == 'Succeeded':
