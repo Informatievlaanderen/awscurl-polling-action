@@ -16,8 +16,8 @@ jobs:
             access-key: ${{ secrets.ACCESS_KEY }}
             secret-key: ${{ secrets.SECRET_KEY }}
             region: eu-west-1
-            interval: 2
             deploy-target: 'none'
+            application: 'none'
         - name: output
           shell: bash
           run: |

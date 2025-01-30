@@ -51,7 +51,7 @@ def sendBuildRequest():
 
     aws_deploy_req_body = json.dumps(payload)
     sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
-    print(f'Deploying with v4!')
+    print(f'::debug::Deploying with v4!')
     cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
 
     output = exec(cmd)
@@ -66,7 +66,7 @@ def getStatus(build_id):
     return json.loads(output)
 
 def main():
-    print(f'Start')
+    print(f'::debug::Start')
 
     buildResponse = sendBuildRequest()
 
@@ -76,11 +76,11 @@ def main():
         try:
             statusResponse = getStatus(buildResponse['BuildUuid'])
             statusMessage = statusResponse['message']
-            print(f'Message: "{statusMessage}"')
+            print(f'::debug::Message: "{statusMessage}"')
             status = statusResponse['details']['status']
-            print(f'Deployment for version {args.version} to environment {args.environment}: "{status}"')
+            print(f'::debug::Deployment for version {args.version} to environment {args.environment}: "{status}"')
         except Exception as e:
-            print(f'Polling request failed with exception: {e}. Trying again!')
+            print(f'::debug::Polling request failed with exception: {e}. Trying again!')
             continue
         
         if statusMessage == 'Succeeded':

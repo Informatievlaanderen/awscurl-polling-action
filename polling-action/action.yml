@@ -28,16 +28,16 @@ inputs:
     description: aws secret key
     required: true
 
-# input limit reached
+# input limit reached  | see: https://github.com/orgs/community/discussions/8774
   # region:
   #   description: 'region | default: eu-west-1'
   #   required: false
   #   default: eu-west-1
 
-  interval:
-    description: polling interval in seconds default is 2 seconds
-    required: false
-    default: 2
+  # interval:
+  #   description: polling interval in seconds default is 2 seconds
+  #   required: false
+  #   default: 2
 
   deploy-target:
     description: 'options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"] | default: none '
@@ -73,6 +73,7 @@ runs:
   using: 'docker'
   image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.11'
   args:
+  #limit: 10 | see: https://github.com/orgs/community/discussions/8774
     - ${{ inputs.environment }}
     - ${{ inputs.version }}
     - ${{ inputs.status-url }}
@@ -80,7 +81,7 @@ runs:
     - ${{ inputs.access-key }}
     - ${{ inputs.secret-key }}
 #    - ${{ inputs.region }}
-    - ${{ inputs.interval }}
+#    - ${{ inputs.interval }}
     - ${{ inputs.deploy-target }}
     - ${{ inputs.domain }}
     - ${{ inputs.project }}
