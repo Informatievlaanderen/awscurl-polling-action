@@ -1,4 +1,4 @@
-FROM python:3.10.2-slim
+FROM python:3.12-slim
 
 COPY install-packages.sh ./install-packages.sh
 RUN chmod +x ./install-packages.sh

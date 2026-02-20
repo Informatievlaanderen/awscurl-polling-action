@@ -16,6 +16,7 @@ parser.add_argument('-t','--deploy_target', help='options ["none", "beanstalk", 
 parser.add_argument('--domain', help='options ["none", "basisregisters"]', default='none', required=False)
 parser.add_argument('--project', help='options ["none", "basisregisters"]', default='none', required=False)
 parser.add_argument('--application', help='options ["none", "basisregisters"]', default='none', required=True)
+parser.add_argument('--use_subfolder', type=bool, help='options [true, false] | default: false', default=False, required=False)
 args = parser.parse_args()
 
 status_responses = []
@@ -48,6 +49,9 @@ def sendBuildRequest():
         "deploy_target": str(args.deploy_target),
         "version":{str(args.application): str(args.version)}
     }
+
+    if str(args.domain) != "none" and args.use_subfolder:
+        payload["application_subfolder"] = str(args.domain)
 
     aws_deploy_req_body = json.dumps(payload)
     sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging

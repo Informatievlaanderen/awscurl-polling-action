@@ -1,28 +1,40 @@
 #!/bin/sh
 
-# Check if the deploy_taget ($9) is set or not
 if [ -z "$7" ]; then
-  deploy_target="none"
+  interval=2
 else
-  deploy_target="$7"
+  interval="$7"
 fi
 
 if [ -z "$8" ]; then
-  domain="none"
+  region="eu-west-1"
 else
-  domain="$8"
+  region="$8"
 fi
 
-if [ -z "${9}" ]; then
-  project="none"
+# Check if the deploy_taget ($9) is set or not
+if [ -z "$9" ]; then
+  deploy_target="none"
 else
-  project="${9}"
+  deploy_target="$9"
 fi
 
 if [ -z "${10}" ]; then
+  domain="none"
+else
+  domain="${10}"
+fi
+
+if [ -z "${11}" ]; then
+  project="none"
+else
+  project="${11}"
+fi
+
+if [ -z "${12}" ]; then
   application="none"
 else
-  application="${10}"
+  application="${12}"
 fi
 
 python3 /main.py \
@@ -32,7 +44,10 @@ python3 /main.py \
 --deploy_url "$4" \
 --access_key "$5" \
 --secret_key "$6" \
+-i "$interval" \
+-r "$region" \
 --deploy_target "$deploy_target" \
 --domain "$domain" \
 --project "$project" \
---application "$application";
+--application "$application" \
+--use_subfolder "${13}"
