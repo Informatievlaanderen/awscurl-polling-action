@@ -1,40 +1,40 @@
 #!/bin/sh
 
-if [ -z "$7" ]; then
+if [ -z "$6" ]; then
   interval=2
 else
-  interval="$7"
+  interval="$6"
 fi
 
-if [ -z "$8" ]; then
+if [ -z "$7" ]; then
   region="eu-west-1"
 else
-  region="$8"
+  region="$7"
 fi
 
-# Check if the deploy_taget ($9) is set or not
-if [ -z "$9" ]; then
+# Check if the deploy_taget (${8}) is set or not
+if [ -z "${8}" ]; then
   deploy_target="none"
 else
-  deploy_target="$9"
+  deploy_target="${8}"
+fi
+
+if [ -z "${9}" ]; then
+  domain="none"
+else
+  domain="${9}"
 fi
 
 if [ -z "${10}" ]; then
-  domain="none"
+  project="none"
 else
-  domain="${10}"
+  project="${10}"
 fi
 
 if [ -z "${11}" ]; then
-  project="none"
-else
-  project="${11}"
-fi
-
-if [ -z "${12}" ]; then
   application="none"
 else
-  application="${12}"
+  application="${11}"
 fi
 
 python3 /main.py \
@@ -42,12 +42,11 @@ python3 /main.py \
 --version "$2" \
 --status_url "$3" \
 --deploy_url "$4" \
---access_key "$5" \
---secret_key "$6" \
+--role_arn "$5" \
 -i "$interval" \
 -r "$region" \
 --deploy_target "$deploy_target" \
 --domain "$domain" \
 --project "$project" \
 --application "$application" \
---use_subfolder "${13}"
+--use_subfolder "${12}"

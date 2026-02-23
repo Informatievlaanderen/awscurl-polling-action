@@ -20,12 +20,8 @@ inputs:
     description: deploy url
     required: true
 
-  access-key:
-    description: aws access key
-    required: true
-
-  secret-key:
-    description: aws secret key
+  role-arn:
+    description: aws role arn to assume
     required: true
 
   region:
@@ -75,14 +71,13 @@ outputs:
 
 runs:
   using: 'docker'
-  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.0.12'
+  image: 'docker://ghcr.io/informatievlaanderen/awscurl-polling-action:deploy-v4.1.0'
   args:
     - ${{ inputs.environment }}
     - ${{ inputs.version }}
     - ${{ inputs.status-url }}
     - ${{ inputs.deploy-url }}
-    - ${{ inputs.access-key }}
-    - ${{ inputs.secret-key }}
+    - ${{ inputs.role-arn }}
     - ${{ inputs.interval }}
     - ${{ inputs.region }}
     - ${{ inputs.deploy-target }}

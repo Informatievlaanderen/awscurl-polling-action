@@ -1,6 +1,18 @@
 #!/usr/bin/python
 
-import os, sys, subprocess, json, time, argparse
+import argparse
+import json
+import os
+import sys
+import time
+import urllib.error
+import urllib.request
+
+import boto3
+import botocore
+from botocore.auth import SigV4Auth
+from botocore.awsrequest import AWSRequest
+from botocore.credentials import Credentials
 
 # args
 parser = argparse.ArgumentParser(description='awscurl polling action')
@@ -8,8 +20,7 @@ parser.add_argument('-e','--environment', help='options ["test", "beta", "tni", 
 parser.add_argument('-v','--version', help='deploy version', required=True)
 parser.add_argument('-s','--status_url', required=True)
 parser.add_argument('-d', '--deploy_url', required=True)
-parser.add_argument('--access_key', help='aws access key', required=True)
-parser.add_argument('--secret_key', help='aws secret key', required=True)
+parser.add_argument('--role_arn', help='aws role arn to assume for credentials', required=True)
 parser.add_argument('-r','--region', help='region default: eu-west-1', default='eu-west-1')
 parser.add_argument('-i','--interval', type=int, help='polling interval in seconds. default: 2', default=2)
 parser.add_argument('-t','--deploy_target', help='options ["none", "beanstalk", "ecs", "ecs_service", "agb_ecs_service", "ecs_scheduled_task"]', default='none', required=False)
@@ -38,13 +49,84 @@ def sendOutput(name, value):
     with open(os.environ['GITHUB_OUTPUT'], 'a') as fh:
         print(f'{name}={value}', file=fh)
 
-def exec(cmd):
-    return (subprocess.Popen(cmd,
-                             shell=True,
-                             stdout=subprocess.PIPE,
-                             universal_newlines=True).communicate()[0]).strip()
+def get_github_oidc_token():
+    request_url = os.getenv('ACTIONS_ID_TOKEN_REQUEST_URL')
+    request_token = os.getenv('ACTIONS_ID_TOKEN_REQUEST_TOKEN')
 
-def sendBuildRequest():
+    if not request_url or not request_token:
+        return None
+
+    separator = '&' if '?' in request_url else '?'
+    token_url = f'{request_url}{separator}audience=sts.amazonaws.com'
+    request = urllib.request.Request(token_url)
+    request.add_header('Authorization', f'bearer {request_token}')
+
+    with urllib.request.urlopen(request) as response:
+        payload = json.loads(response.read().decode('utf-8'))
+
+    return payload.get('value')
+
+def get_credentials():
+    role_arn = args.role_arn.strip()
+    if not role_arn:
+        sendFailed('role_arn is required')
+
+    base_session = boto3.Session(region_name=args.region)
+    sts_client = base_session.client('sts', region_name=args.region)
+
+    try:
+        assume_role_response = sts_client.assume_role(
+            RoleArn=role_arn,
+            RoleSessionName='awscurl-polling-action'
+        )
+    except botocore.exceptions.NoCredentialsError:
+        oidc_token = get_github_oidc_token()
+        if not oidc_token:
+            sendFailed(
+                'Unable to locate AWS credentials. '
+                'Provide base AWS credentials (for sts:AssumeRole) '
+                'or enable GitHub OIDC (permissions: id-token: write).'
+            )
+
+        assume_role_response = sts_client.assume_role_with_web_identity(
+            RoleArn=role_arn,
+            RoleSessionName='awscurl-polling-action',
+            WebIdentityToken=oidc_token
+        )
+
+    assumed = assume_role_response['Credentials']
+    print(f'::debug::Using assumed role credentials for role: {role_arn}')
+    return Credentials(
+        access_key=assumed['AccessKeyId'],
+        secret_key=assumed['SecretAccessKey'],
+        token=assumed['SessionToken']
+    )
+
+def signed_post(url, credentials, payload=None):
+    data = None
+    headers = {}
+
+    if payload is not None:
+        data = json.dumps(payload).encode('utf-8')
+        headers['content-type'] = 'application/json'
+
+    aws_request = AWSRequest(method='POST', url=url, data=data, headers=headers)
+    SigV4Auth(credentials, 'execute-api', args.region).add_auth(aws_request)
+    prepared = aws_request.prepare()
+
+    request = urllib.request.Request(url=url, data=data, method='POST')
+    for header_name, header_value in prepared.headers.items():
+        request.add_header(header_name, header_value)
+
+    try:
+        with urllib.request.urlopen(request) as response:
+            return response.read().decode('utf-8')
+    except urllib.error.HTTPError as error:
+        error_body = error.read().decode('utf-8', errors='replace')
+        sendGroupedOutput('request error', [f'HTTP {error.code}', error_body])
+        raise
+
+def sendBuildRequest(credentials):
     payload = {
         "deploy_target": str(args.deploy_target),
         "version":{str(args.application): str(args.version)}
@@ -53,32 +135,29 @@ def sendBuildRequest():
     if str(args.domain) != "none" and args.use_subfolder:
         payload["application_subfolder"] = str(args.domain)
 
-    aws_deploy_req_body = json.dumps(payload)
-    sendGroupedOutput("request body",[aws_deploy_req_body]) #Logging
+    sendGroupedOutput("request body", [json.dumps(payload)])
     print(f'::debug::Deploying with v4!')
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST -d '{aws_deploy_req_body}' {args.deploy_url}"
-
-    output = exec(cmd)
+    output = signed_post(args.deploy_url, credentials, payload)
     sendGroupedOutput("deploy response",[output]) #Logging
     return json.loads(output)
 
-def getStatus(build_id):
+def getStatus(build_id, credentials):
     aws_status_url = f'{args.status_url}/{build_id}'
-    cmd = f"awscurl --access_key '{args.access_key}' --secret_key '{args.secret_key}' --region '{args.region}' --service execute-api -X POST {aws_status_url}"
-    output = exec(cmd)
+    output = signed_post(aws_status_url, credentials)
     status_responses.append(output)
     return json.loads(output)
 
 def main():
     print(f'::debug::Start')
 
-    buildResponse = sendBuildRequest()
+    credentials = get_credentials()
+    buildResponse = sendBuildRequest(credentials)
 
     sendOutput("build-uuid", buildResponse['BuildUuid'])
     time.sleep(10)
     while True:
         try:
-            statusResponse = getStatus(buildResponse['BuildUuid'])
+            statusResponse = getStatus(buildResponse['BuildUuid'], credentials)
             statusMessage = statusResponse['message']
             print(f'::debug::Message: "{statusMessage}"')
             status = statusResponse['details']['status']
@@ -98,7 +177,7 @@ def main():
         sendWarning(f"build-uuid: {statusResponse }")
         sendFailed(f'Deployment for version {args.version} to environment {args.environment}: {statusMessage}')
     
-    sendGroupedOutput("status responses",  [status_responses])
+    sendGroupedOutput("status responses", status_responses)
     sendOutput("status", statusMessage)
     sendOutput("final-message",f'Deployment for version {args.version} to environment {args.environment}: {status}')
     sys.exit()

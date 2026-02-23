@@ -1,5 +1,5 @@
 # awscurl-polling-action
-A Github action which uses awscurl to poll an AWS endpoint
+A Github action that polls an AWS endpoint using SigV4-signed requests.
 
 ## Example
 ```yaml
@@ -18,8 +18,7 @@ jobs:
             version: ${{ secrets.VERSION }}
             status-url: ${{ secrets.STATUS_URL }}
             deploy-url: ${{ secrets.DEPLOY_URL }}
-            access-key: ${{ secrets.ACCESS_KEY }}
-            secret-key: ${{ secrets.SECRET_KEY }}
+            role-arn: ${{ secrets.DEPLOY_ROLE_ARN }}
             interval: 2
             deploy-target: 'none'
             domain: 'none'
@@ -40,12 +39,14 @@ jobs:
 | version | The release version. | - | Yes |
 | status-url | The status url for fetching the deploy status | - | Yes |
 | deploy-url | The deploy url for sending a request for deployment | - | Yes |
-| access-key | AWS Access Key | - | Yes |
-| secret-key | AWS Secret Key | - | Yes |
+| role-arn | AWS Role ARN to assume before calling API Gateway | - | Yes |
 | interval | Polling interval in seconds | 2 | No |
 | deploy-target | `none`, `beanstalk`, `ecs`, `ecs_service`, `agb_ecs_service`, `ecs_scheduled_task` | `none` | No |
 | domain | `none`, `basisregisters` | `none` | No |
 | project | `none`, `basisregisters` | `none` | No |
+
+Authentication is role-only:
+- `role-arn` is required
 
 ### Outputs
 |Argument| Description |

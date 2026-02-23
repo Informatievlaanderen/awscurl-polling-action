@@ -21,6 +21,7 @@ apt-get -y install --no-install-recommends curl;
 pip --no-cache-dir install --upgrade pip;
 pip --no-cache-dir install setuptools wheel;
 pip --no-cache-dir install awscurl;
+pip --no-cache-dir install boto3;
 
 # Delete cached files we don't need anymore (note that if you're
 # using official Docker images for Debian or Ubuntu, this happens
